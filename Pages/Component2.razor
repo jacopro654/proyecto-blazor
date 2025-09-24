@@ -1,0 +1,163 @@
+﻿@page "/panel-interactivo"
+
+@inject SessionState Sesion
+
+<h3 class="mb-4">📋 Panel Interactivo</h3>
+
+<div class="row">
+    <!-- Formulario de Usuario -->
+    <div class="col-md-6">
+        <h4>👤 Registrar Usuario</h4>
+        <EditForm Model="@nuevoUsuario" OnValidSubmit="GuardarUsuario" FormName="FormularioUsuario">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-2">
+                <label>Nombre:</label>
+                <InputText @bind-Value="nuevoUsuario.Nombre" class="form-control" />
+                <ValidationMessage For="@(() => nuevoUsuario.Nombre)" />
+            </div>
+
+            <div class="mb-2">
+                <label>Correo:</label>
+                <InputText @bind-Value="nuevoUsuario.Correo" class="form-control" />
+                <ValidationMessage For="@(() => nuevoUsuario.Correo)" />
+            </div>
+
+            <div class="mb-2">
+                <label>Contraseña:</label>
+                <InputText @bind-Value="nuevoUsuario.Contraseña" type="password" class="form-control" />
+                <ValidationMessage For="@(() => nuevoUsuario.Contraseña)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+        </EditForm>
+
+        @if (Sesion.EstaLogueado)
+        {
+            <div class="alert alert-info mt-3">
+                👋 Bienvenido, <strong>@Sesion.UsuarioActual?.Nombre</strong>
+            </div>
+        }
+    </div>
+
+    <!-- Formulario de Evento -->
+    <div class="col-md-6">
+        <h4>🗓️ Crear Evento</h4>
+        <EditForm Model="@nuevoEvento" OnValidSubmit="GuardarEvento" FormName="FormularioEvento">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-2">
+                <label>Título:</label>
+                <InputText @bind-Value="nuevoEvento.Titulo" class="form-control" />
+                <ValidationMessage For="@(() => nuevoEvento.Titulo)" />
+            </div>
+
+            <div class="mb-2">
+                <label>Fecha:</label>
+                <InputDate @bind-Value="nuevoEvento.Fecha" class="form-control" />
+                <ValidationMessage For="@(() => nuevoEvento.Fecha)" />
+            </div>
+
+            <div class="mb-2">
+                <label>Ubicación:</label>
+                <InputText @bind-Value="nuevoEvento.Ubicacion" class="form-control" />
+                <ValidationMessage For="@(() => nuevoEvento.Ubicacion)" />
+            </div>
+
+            <div class="mb-2">
+                <label>Descripción:</label>
+                <InputTextArea @bind-Value="nuevoEvento.Descripcion" class="form-control" />
+                <ValidationMessage For="@(() => nuevoEvento.Descripcion)" />
+            </div>
+
+            <button type="submit" class="btn btn-success">Guardar Evento</button>
+        </EditForm>
+    </div>
+</div>
+
+<hr />
+
+<!-- Listado de Usuarios -->
+<h4 class="mt-4">👥 Usuarios Registrados</h4>
+@if (usuarios.Any())
+{
+    <div class="row">
+        @foreach (var user in usuarios)
+        {
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5>@user.Nombre</h5>
+                        <p><strong>Correo:</strong> @user.Correo</p>
+                        <p><strong>Contraseña:</strong> @user.Contraseña</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No hay usuarios registrados.</p>
+}
+
+<!-- Listado de Eventos -->
+<h4 class="mt-4">📅 Eventos Guardados</h4>
+@if (eventos.Any())
+{
+    <div class="row">
+        @foreach (var ev in eventos)
+        {
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5>@ev.Titulo</h5>
+                        <p><strong>Fecha:</strong> @ev.Fecha?.ToShortDateString()</p>
+                        <p><strong>Ubicación:</strong> @ev.Ubicacion</p>
+                        <p><strong>Descripción:</strong> @ev.Descripcion</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No hay eventos registrados.</p>
+}
+
+@code {
+    private UserModel nuevoUsuario = new();
+    private EventModel nuevoEvento = new();
+
+    private List<UserModel> usuarios = new();
+    private List<EventModel> eventos = new();
+
+    private void GuardarUsuario()
+    {
+        usuarios.Add(new UserModel
+            {
+                Nombre = nuevoUsuario.Nombre,
+                Correo = nuevoUsuario.Correo,
+                Contraseña = nuevoUsuario.Contraseña
+            });
+
+        Sesion.UsuarioActual = nuevoUsuario; // ← Aquí se asigna el usuario a la sesión
+        nuevoUsuario = new();
+    }
+
+    private void GuardarEvento()
+    {
+        eventos.Add(new EventModel
+            {
+                Titulo = nuevoEvento.Titulo,
+                Fecha = nuevoEvento.Fecha,
+                Ubicacion = nuevoEvento.Ubicacion,
+                Descripcion = nuevoEvento.Descripcion
+            });
+
+        nuevoEvento = new();
+    }
+}
